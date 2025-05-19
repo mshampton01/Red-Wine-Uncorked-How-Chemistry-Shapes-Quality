@@ -1,0 +1,241 @@
+---
+title: "Red Wine Uncorked: How Chemistry Shapes Quality"
+author: "Cynthia Hampton"
+output: word_document
+date: "2025-05-12"
+---
+
+# Introduction 
+As representatives of Winebow, a U.S.-based importer and distributor with a deep-rooted passion for fine wine and spirits, we are committed to delivering an exceptional experience to our customers. Our mission extends beyond distribution—we aim to curate a thoughtful selection that highlights the craftsmanship of our producers while enhancing their global exposure and reach. In the world of wine, quality is a concept shaped not only by tradition and terroir but also by science. A wine’s chemical composition plays a crucial role in defining its aroma, flavor, texture, and overall appeal. Understanding these chemical underpinnings allows producers, distributors, and connoisseurs alike to better evaluate and appreciate wine at every stage—from vineyard to glass. This analysis explores how the chemical composition of red wine influences its overall quality. 
+
+# Data Description 
+The data used in this study come from red wine samples of the Portuguese “Vinho Verde” variety. These samples include physicochemical inputs, which measure the physical and chemical properties that influence a wine's quality, composition, and behavior during production, aging, and consumption. Additionally, a sensory variable is included to assess the wine’s quality on a scale from 0 to 10.
+Multiple tests were conducted to explore the relationships between these physicochemical properties and the sensory quality score. For this project, we randomly selected several key properties to examine their influence and potential for optimization. The selected variables includes:
+Fixed Acidity refers to the wine’s organic acids that do not easily evaporate and contribute to the overall taste profile.
+Residual Sugar is the amount of sugar remaining after fermentation, which affects the sweetness and balance of the wine.
+Total Sulfur Dioxide is the combined amount of free and bound sulfur dioxide in the wine.
+Free sulfur dioxide (SO₂) is an additive not chemically bound to other compounds and is used for its antioxidant and preservative properties.
+Bound sulfur dioxide is chemically combined with other elements such as sugar or acetaldehyde.
+Citric Acid is a minor organic acid that influences the wine's taste. In small doses, it adds freshness and a fruity aroma, while higher concentrations can result in a tart or sour taste.
+Alcohol Content indicates the amount of alcohol produced during fermentation when yeast converts sugars. Generally, lower alcohol content (below 10%) results in a sweeter wine, while higher alcohol content (above 10%) tends to produce a stronger, more pungent taste.
+This investigation aims to understand how the composition of these variables impacts the overall quality of red wine.
+
+
+## Setting up R file
+```{r setup, include=FALSE}
+chooseCRANmirror(graphics = FALSE, ind = 1)
+#Downloading and installing necessary packages
+install.packages("regclass")
+library(regclass)
+install.packages("ggplot2")
+library(ggplot2)
+install.packages("tidyverse")
+library(tidyverse)
+install.packages("corrplot")
+library("corrplot")
+
+
+```
+
+## R Markdown
+
+Association: Between Two Quantitative Variables 
+Y: Quality 
+X:  Wine Composition metrics 
+    Fixed Acidity 
+    Residual Sugar 
+    Total Sulfur Dioxide 
+    Citric Acid 
+    Alcohol
+
+## Loading file and checking dataset
+```{r wine}
+#Loading file
+getwd()
+list.files()
+wine <-read.csv('Red Wine Quality .csv')
+
+#Checking dataset
+head(wine)
+names(wine)
+str(wine)
+
+#Checking for missing values
+sum(is.na(wine))
+colSums(is.na(wine))
+
+#Checking for duplicates
+sum(duplicated(wine))
+
+#Checking Correlations with quality
+all_correlations(wine, interest = "quality", sorted = "magnitude")
+```
+
+# Variables for Association Analysis
+
+###Total Sulfur Dioxide and Quality 
+
+```{r total}
+#Plot Graph 
+ggplot(wine, aes(x = total.sulfur.dioxide, y = quality)) + 
+  geom_point(color = "darkred", alpha = 0.6) + 
+  geom_smooth(method = "lm", color = "red", fill = "mistyrose", se = TRUE) + 
+  ggtitle("Total Sulfur Dioxide vs. Quality")
+
+#Checking for Association 
+associate(quality~total.sulfur.dioxide, data= wine)
+
+#Checking for Correlation 
+all_correlations(wine, interest = "total.sulfur.dioxide", sorted= "magnitude")
+
+```
+**Analysis:**According to the Pearson correlation (r= -0.185) total sulfur dioxide and wine quality have a weak negative linear relationship. This suggests that while there is a slight negative correlation between the two variables, the relationship is weak. P- values are less than 0.05, so the correlation is statistically significant. Total sulfur dioxide serves as a preservative to prevent oxidation, but its influence on wine quality appears to be minimal compared to other variables.
+
+
+###Citric Acid  Quality
+
+```{r citric}
+#Plot Graph 
+ggplot(wine, aes(x = citric.acid, y = quality)) + 
+  geom_point(color = "darkred", alpha = 0.6) + 
+  geom_smooth(method = "lm", color = "red", fill = "mistyrose", se = TRUE) + 
+  ggtitle("Citric Acid vs. Quality")
+
+#Association
+associate(quality~citric.acid, data= wine)
+
+#Correlation
+all_correlations(wine, interest = "citric.acid", sorted= "magnitude")
+```
+**Analysis:** Pearson's correlation was (r= 0.2263), indicating there is a weak positive linear relationship between citric acid and quality. P-values are less than 0.05, indicating the correlations are statistically significant. However, citric acid and wine quality linear relationship isn’t meaningful. The correlation between the two variables is weak, indicating that citric acid is not a reliable predictor of wine quality. While citric acid may play a role in the taste or acidity balance of wine, its impact on overall quality appears to be minimal based on this analysis.
+
+### Alcohol and Quality 
+
+```{r alcohol, echo=FALSE}
+#Plot Graph 
+ggplot(wine, aes(x = alcohol, y = quality)) + 
+  geom_point(color = "darkred", alpha = 0.6) + 
+  geom_smooth(method = "lm", color = "red", fill = "mistyrose", se = TRUE) +  
+  ggtitle("Alcohol vs. Quality")
+
+#Association
+associate(quality~alcohol, data= wine)
+
+#Correlation
+all_correlations(wine, interest = "alcohol", sorted= "magnitude")
+
+```
+**Analysis:** The Pearson correlation (r= 0.4761), there is a moderate linear relationship between the quality of wine and alcohol. P-values are less than 0.05, so the correlations are statistically significant between the two variables.During the fermentation period, producers may allow longer fermentation for higher-quality wines or certain styles, such as bold reds, which naturally result in higher alcohol content.
+
+
+### Sulphates and Quality 
+```{r Sulphates, echo=FALSE}
+#Graph
+ggplot(wine, aes(x = sulphates, y = quality)) + 
+  geom_point(color = "darkred", alpha = 0.6) + 
+  geom_smooth(method = "lm", color = "red", fill = "mistyrose", se = TRUE) + 
+  ggtitle("Sulphates vs. Quality")
+## `geom_smooth()` using formula = 'y ~ x'
+
+#Checking for association
+associate(quality~sulphates, data = wine)
+
+#Checking for correlation against all variables
+all_correlations(wine, interest = "sulphates", sorted = "magnitude")
+
+```
+**Analysis:**According to the Pearson correlation (r = 0.25), there is a moderate positive linear relationship between the quality of wine and sulphates. As sulphates increase, the quality of wine tends to increase slightly, but it is not a very strong correlation. P-values are lower than 0.007 for both quality and sulphates, so the correlations are significant between the two and sulphates are meaningfully associated with the quality of wine, even if the linear relationship is weaker. Sulphates appear to correlate strongly with other variables such as citric acid, suggesting that sulphates is more present in the chemical composition of the wine rather than the quality.
+
+
+
+### Residual Sugar and Quality 
+```{r Residual.Sugar, echo=FALSE}
+#Graph
+ggplot(wine, aes(x = residual.sugar, y = quality)) + 
+  geom_point(color = "darkred", alpha = 0.6) + 
+  geom_smooth(method = "lm", color = "red", fill = "mistyrose", se = TRUE) + 
+  ggtitle("Residual Sugar vs. Quality")
+## `geom_smooth()` using formula = 'y ~ x'
+
+
+#Checking for association
+associate(quality~residual.sugar, data = wine)
+
+#Checking for correlation against all variables
+all_correlations(wine, interest = "residual.sugar", sorted = "magnitude")
+
+```
+**Analysis:**According to the Pearson correlation (r = 0.0137), there is nearly no linear relationship between the quality of wine and residual sugar. P-values are higher than 0.05, so the correlations are not statistically significant. We fail to reject the null hypothesis, meaning residual sugar is not associated with the quality of wine. In the graph, there is no visible pattern and the data points are concentrated at low sugar levels, with no clear slope. Residual sugar has some correlation with density, as sugar adds weight to the wine. Overall, there is no meaningful correlation between the quality of wine and residual sugar.
+
+### Correlations Visualization
+```{r correlations.vis, echo=FALSE}
+#Correlations Visualization
+cor_matrix <- cor(wine)
+wine_colors <- colorRampPalette(c("mistyrose", "lightcoral", "darkred"))(200)
+corrplot(cor_matrix, method = "circle", type = "lower", col = wine_colors, tl.col = "black", tl.cex = 0.9, tl.pos = "l", cl.pos = "b", cl.cex = 0.8, number.cex = 0.6, addCoef.col = "black", 
+         title = "Red Wine Quality Correlation Matrix", mar = c(0, 0, 2, 0))
+
+```
+**Analysis:** This correlation matrix creates a visualization of the linear relationships between the quality of wine and other variables in the chemical properties. The darker red shows a stronger positive correlation, and the lighter colors show weaker correlations. Negative correlations are shown in lighter colors. The bigger circles show stronger correlation, whether it is positive or negative, and smaller circles show weak or no correlation.
+Alcohol appears to have the strongest positive correlations with quality at 0.48, meanwhile volatile acidity shows a weak negative correlation with quality at -0.26. Residual sugar and chlorides show little or no correlation with quality. Citric acid and fixed acidity are strongly correlated with each other, and weakly correlated with pH. Residual sugar, chlorides, and sulphates have either little or no direct relationship with quality of wine.
+
+
+# Multi Linear Regression 
+```{r multilinear, echo=FALSE}
+
+install.packages("dotwhisker")
+library(dotwhisker)
+vars = names(wine)
+i = 1
+vars[i]
+for(value in wine){
+  plot(quality~value,data = wine, xlab =vars[i])
+  model = lm(quality~value,data = wine)
+  abline(model)
+  names(model$coefficients)[2] = vars[i]
+  i= i+1
+  print(summary(model))
+}
+max(wine$density) - min(wine$density)
+min(wine$density)
+
+multilin = lm(quality~alcohol+volatile.acidity+sulphates+citric.acid+total.sulfur.dioxide, data = wine)
+summary(multilin)
+dwplot(multilin)
+
+```
+**Analysis:**Of the coefficients all are statistically significant except for citric acid using a standard 95% confidence interval (p <.05). From the significant coefficients two of them are positive and two are negative with alcohol level and sulfates both providing a positive impact though the model shows that sulphates have a higher impact on the wines quality. From this wine makers could conclude that focusing on a wine that emphasizes sulphates over one that does not would result in a better end product.
+On the other hand, volatile acidity has a very negative impact on wine quality. The presence of excess citric acid causes an undesirable taste in the wine and because this coefficient is high it shows that it has a large impact on how wine is made and should be considered for wine makers Total sulfur dioxide value is low indicating that even though it is statistically significant the impact that it has is negligible. This shows that sulfur dioxide may be unnoticeable to people who are drinking the wine and is not something that may need to be considered for wine makers.
+The R squared value for this model indicates that it explains an adequate amount of the variance but there may be other factors that contribute to a wines quality outside of what is in the dataset currently such as vineyard or vintage.
+
+
+# Lasso Regression 
+```{r lasso, echo=FALSE}
+library(glmnet)
+# Subset the relevant variables
+selected_vars <- c("fixed.acidity", "residual.sugar", "total.sulfur.dioxide",
+                   "free.sulfur.dioxide", "citric.acid", "alcohol")
+x <- as.matrix(wine[, selected_vars])  # Predictor matrix
+y <- wine$quality                      # Target variable
+
+# Perform Lasso Regression with Cross-Validation
+lasso_model <- cv.glmnet(x, y, alpha = 1, standardize = TRUE)
+
+# Plot cross-validation MSE vs. lambda
+plot(lasso_model)
+
+# Best lambda value
+best_lambda <- lasso_model$lambda.min
+cat("Best lambda:", best_lambda, "\n")
+
+# Coefficients at best lambda
+lasso_coefs <- coef(lasso_model, s = best_lambda)
+print(lasso_coefs)
+
+```
+**Analysis:** In order to have a better understanding of the factors influencing red wine quality, we utilized a Lasso Regression model. Using the Lasso Regression was helpful in predicting the outcomes and performing variable selection, notably by shrinking the less significant coefficients closer to zero. By using cross-validation to determine the lambda value, we found that it was approximately 0.0009. The mean squared error was minimized at this value, which shows that there was a food balance with the model accuracy. The results of this regression show that all the selected variables contributed to the prediction, and none of the variables were eliminated. 
+Citric acid had the strongest positive influence on wine quality, suggesting that wines with higher amounts of citric acid have higher ratings. Alcohol also has a strong positive relationship with quality, which supports the perception that higher levels of alcohol enhance the quality and flavor of wine. Residual sugar and total sulfur dioxide had negative coefficients which implies that increasing these variables could have a negative effect on the quality of wine. Fixed acidity and free sulfur dioxide showed small positive effects, implying there is a small but slightly significant impact on quality. Overall, the Lasso Regression reiterated the discoveries from the other tests we conducted in regards to the impact of the chosen variables in comparison to wine quality.
+
+# Conclusion
+In consideration with all of our conducted tests, we conclude that alcohol, sulphates, and citric acid have the strongest positive correlations with quality amongst all the variables, suggesting that having higher levels of these variables can have a positive effect on wine. These variables had significant associations and coefficients as shown in the correlation matrix and the multi linear regression and lasso regression. On the other hand, residual sugar and total sulfur dioxide had a negative association with quality, suggesting that having higher levels of these variables can have a negative effect on wine. Other variables such as fixed acidity, free sulfur dioxide, and volatile acidity had more weak or inconsistent relationships, showing that their effect on wine quality is not as significant. 
+As representatives of Winebow, we can use these insights to confirm that wine quality is not only determined by tradition and terroir, but also by the chemical makeup. Wine producers can enhance their production process to bring out the most desirable properties of wine and distributors can better position wine products to consumers. Ultimately, this analysis creates a connection between wine craftsmanship and science, supporting our mission to elevate wine experiences through data-driven selection.
